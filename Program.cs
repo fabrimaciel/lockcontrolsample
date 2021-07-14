@@ -9,6 +9,9 @@ namespace LockControlSample
         {
             var accessControl = new AccessControl();
 
+            accessControl.LockInstanceCreated += (_, e) => Console.WriteLine("Transaction created...");
+            accessControl.LockInstanceReleased += (_, e) => Console.WriteLine("Transaction released...");
+
             var method = new System.Threading.ParameterizedThreadStart(state =>
             {
                 var items = (object[])state;
