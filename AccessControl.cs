@@ -17,6 +17,9 @@ namespace LockControlSample
 
         ~AccessControl() => this.Dispose(false);
 
+        public IDisposable CreateLocker(object reference) =>
+            this.CreateLocker(reference, System.Threading.Timeout.InfiniteTimeSpan);
+
         public IDisposable CreateLocker(object reference, TimeSpan timeout)
         {
             if (reference == null)
