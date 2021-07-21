@@ -5,10 +5,9 @@ using System.Threading;
 
 namespace LockControlSample
 {
-
     public class AccessControl : IDisposable
     {
-        private static readonly object WildCartReference = new object();
+        private static readonly object WildCardReference = new object();
         private readonly Queue<LockInfo> locks = new Queue<LockInfo>();
 
         public event EventHandler<LockInstanceEventArgs> LockInstanceCreated;
@@ -24,7 +23,7 @@ namespace LockControlSample
         {
             if (reference == null)
             {
-                reference = WildCartReference;
+                reference = WildCardReference;
             }
 
             LockInfo info;
@@ -62,10 +61,18 @@ namespace LockControlSample
 
             if (currentInfo != null && currentInfo.Reference != reference)
             {
-                if ((timeout == Timeout.InfiniteTimeSpan && !currentInfo.AllDone.WaitOne()) ||
-                    (timeout != Timeout.InfiniteTimeSpan && !currentInfo.AllDone.WaitOne(timeout)))
+                while (currentInfo != info)
                 {
-                    this.Release(currentInfo);
+                    if ((timeout == Timeout.InfiniteTimeSpan && !currentInfo.AllDone.WaitOne()) ||
+                        (timeout != Timeout.InfiniteTimeSpan && !currentInfo.AllDone.WaitOne(timeout)))
+                    {
+                        this.Release(currentInfo);
+                    }
+
+                    lock (this.locks)
+                    {
+                        currentInfo = this.locks.Count > 0 ? this.locks.Peek() : null;
+                    }
                 }
             }
 
@@ -82,7 +89,7 @@ namespace LockControlSample
             this.LockInstanceCreated?.Invoke(this, new LockInstanceEventArgs(reference));
         }
 
-        protected virtual void OnReleseLockInstance(object reference)
+        protected virtual void OnReleaseLockInstance(object reference)
         {
             this.LockInstanceReleased?.Invoke(this, new LockInstanceEventArgs(reference));
         }
@@ -145,7 +152,7 @@ namespace LockControlSample
                 if (!this.disposed)
                 {
                     this.disposed = true;
-                    this.accessControl.OnReleseLockInstance(this.Reference);
+                    this.accessControl.OnReleaseLockInstance(this.Reference);
                     this.AllDone.Set();
                 }
             }

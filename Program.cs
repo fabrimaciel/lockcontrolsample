@@ -31,21 +31,32 @@ namespace LockControlSample
             var thread2 = new System.Threading.Thread(method);
             var thread3 = new System.Threading.Thread(method);
             var thread4 = new System.Threading.Thread(method);
+            var thread5 = new System.Threading.Thread(method);
+            var thread6 = new System.Threading.Thread(method);
+            var thread7 = new System.Threading.Thread(method);
+            var thread8 = new System.Threading.Thread(method);
 
             var reference1 = new object();
             var reference2 = new object();
+            var reference4 = new object();
 
             thread1.Start(new object[] { 1, reference1, 5000 });
             thread2.Start(new object[] { 2, reference2, 1000 });
             thread3.Start(new object[] { 3, reference1, 3000 });
             thread4.Start(new object[] { 4, reference1, 1500 });
+            thread5.Start(new object[] { 5, null, 3000 });
+            thread6.Start(new object[] { 6, null, 1500 });
+            thread7.Start(new object[] { 7, reference4, 3000 });
+            thread8.Start(new object[] { 8, reference4, 1500 });
 
-            var threads = new[] { thread1, thread2, thread3, thread4 };
+            var threads = new[] { thread1, thread2, thread3, thread4, thread5, thread6, thread7, thread8 };
 
             while (threads.Any(f => f.IsAlive))
             {
                 System.Threading.Thread.Sleep(500);
             }
+
+            accessControl.Dispose();
         }
     }
 }
